@@ -1,0 +1,20 @@
+[package]
+name = "mcubes"
+version = "0.1.0"
+edition = "2024"
+authors = ["David O'Connor <the_alchemist@fastmail.com>"]
+description = "The Marching Cubes algorithm for creating isosurfaces"
+keywords = []
+categories = [
+    "science"
+]
+repository = "https://github.com/David-OConnor/mcubes"
+documentation = "https://docs.rs/mcubes"
+readme = "README.md"
+license = "MIT"
+exclude = [".gitignore"]
+
+
+[dependencies]
+lin_alg = "1.1.10"
+graphics = "0.3.13"
