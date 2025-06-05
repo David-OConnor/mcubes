@@ -1,3 +1,5 @@
+//! Pre-computed data.
+
 pub(crate) const CUBE_CORNER_OFFSETS: [(usize, usize, usize); 8] = [
     (0, 0, 0),
     (1, 0, 0),

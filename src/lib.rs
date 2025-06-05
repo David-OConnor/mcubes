@@ -1,18 +1,20 @@
+#![allow(clippy::needless_range_loop)]
+
 //! Implements the Marching Cubes algorithm for generating Isosurfaces from volume data.
 //!
 //! Example use:
 //! ```rust
 //! use mcubes::{GridPoint, MarchingCubes};
-//! 
+//!
 //! pub struct ElectronDensity {
 //!     pub coords: Vec3,
 //!     pub density: f64,
 //! }
-//! 
+//!
 //! impl GridPoint for ElectronDensity {
 //!     fn value(&self) -> f64 { self.density }
 //! }
-//! 
+//!
 //! fn create_mesh(hdr: &MapHeader, mol: &Molecule, iso_level: f32) {
 //!     let mc = MarchingCubes::new(
 //!         //! Number of grid points along each axis
@@ -25,13 +27,16 @@
 //!         //! The value to draw the isosurface at.
 //!         iso_level,
 //!     );
-//! 
+//!
 //!     let mesh = mc.generate();
 //! }
 //! ```
-//! 
+//!
 mod tables;
 
+use std::{io, io::ErrorKind};
+
+// use std::time::Instant;
 use graphics::{Mesh, Vertex};
 use lin_alg::f32::Vec3;
 
@@ -58,49 +63,38 @@ pub struct Mesh_ {
     pub indices: Vec<usize>,
 }
 
-/// Quantise a Vec3 to integer bins so we can use it as a HashMap key.
-/// 1 Å equals one “voxel unit” in the current grid, so 1-to-1 quantisation
-/// is fine.  If you change the coordinate scaling later, update this!
-fn q(v: Vec3) -> (i32, i32, i32) {
-    (v.x.round() as i32, v.y.round() as i32, v.z.round() as i32)
-}
-
 #[derive(Debug)]
 pub struct MarchingCubes {
     pub dims: (usize, usize, usize),
-    pub data: Vec<f32>,
+    pub values: Vec<f32>,
     pub iso_level: f32,
     scale: [f32; 3],
 }
 
 impl MarchingCubes {
-    /// Build a `MarchingCubes` grid from the voxel list returned by `read_map_data`.
-    ///
-    /// * `hdr` supplies the grid dimensions and some basic statistics.
-    /// * `density` **must** be in the same `x-fast, y-medium, z-slow` order that
-    ///   `read_map_data()` produces (it is, because the nested `for k { for j { for i { … }}}`
-    ///   loop matches our own indexing scheme).
-    ///
-    /// The default iso-level is the mean density stored in the header.  You can
-    /// pick another threshold later by doing `mc.iso_level = …;`.
-    pub fn new<T: GridPoint>(
+    /// Initialize with grid data.
+    ///  `hdr` supplies the grid dimensions and some basic statistics.
+    /// `values` **must** be in the same `x-fast, y-medium, z-slow` order that
+    /// `read_map_data()` produces (it is, because the nested `for k { for j { for i { … }}}`
+    /// loop matches our own indexing scheme).
+    pub fn new(
         dims: (usize, usize, usize),
         size: (f32, f32, f32),
         sampling_interval: (f32, f32, f32),
-        density: &[T],
+        values: Vec<f32>,
         iso_level: f32,
-    ) -> Self {
+    ) -> io::Result<Self> {
         let expected_len = dims.0 * dims.1 * dims.2;
-        assert_eq!(
-            density.len(),
-            expected_len,
-            "Density array has {} points, but header implies {}",
-            density.len(),
-            expected_len
-        );
 
-        // Strip the coordinate part – Marching Cubes needs only the scalar field.
-        let data: Vec<f32> = density.iter().map(|d| d.value() as f32).collect();
+        if values.len() != expected_len {
+            return Err(io::Error::new(
+                ErrorKind::InvalidData,
+                format!(
+                    "Density array has {} points, but header implies {expected_len}.",
+                    values.len()
+                ),
+            ));
+        }
 
         let scale = [
             size.0 / sampling_interval.0,
@@ -108,16 +102,30 @@ impl MarchingCubes {
             size.2 / sampling_interval.2,
         ];
 
-        Self {
+        Ok(Self {
             dims,
-            data,
+            values,
             iso_level,
             scale,
-        }
+        })
+    }
+
+    /// Constructor that uses an `impl GridPoint` vice `Vec<f32>`. This may be desired depending
+    /// on your grid representation. Same as `new` otherwise.
+    pub fn from_gridpoints<T: GridPoint>(
+        dims: (usize, usize, usize),
+        size: (f32, f32, f32),
+        sampling_interval: (f32, f32, f32),
+        values: &[T],
+        iso_level: f32,
+    ) -> io::Result<Self> {
+        let values_vec = values.iter().map(|d| d.value() as f32).collect();
+        Self::new(dims, size, sampling_interval, values_vec, iso_level)
     }
 
     /// Central-difference gradient of the scalar field at integer voxel coords.
     /// Assumes the volume is at least 2×2×2; falls back to fwd/bwd diff at borders.
+    /// We use this to compute normal vectors.
     fn gradient(&self, x: usize, y: usize, z: usize) -> Vec3 {
         let (nx, ny, nz) = self.dims;
 
@@ -143,11 +151,15 @@ impl MarchingCubes {
         Vec3::new(gx, gy, gz)
     }
 
+    /// Run this to generate the mesh; this function contains the primary algorithm.
     pub fn generate(&self) -> Mesh {
+        // Note: We observed slowdowns vice speedups with Rayon, for electron density.
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
 
         let (nx, ny, nz) = self.dims;
+
+        // let start = Instant::now();
 
         for x in 0..(nx - 1) {
             for y in 0..(ny - 1) {
@@ -221,6 +233,9 @@ impl MarchingCubes {
             }
         }
 
+        // let elapsed = start.elapsed();
+        // println!("Time taken for cubes: {:?}us", elapsed.as_micros());
+
         Mesh {
             vertices,
             indices,
@@ -230,7 +245,7 @@ impl MarchingCubes {
 
     fn get_value(&self, x: usize, y: usize, z: usize) -> f32 {
         let (nx, ny, _) = self.dims;
-        self.data[x + y * nx + z * nx * ny]
+        self.values[x + y * nx + z * nx * ny]
     }
 
     fn corner_pos(&self, x: usize, y: usize, z: usize, corner: usize) -> Vec3 {
@@ -241,17 +256,6 @@ impl MarchingCubes {
             (z + dz) as f32 * self.scale[2],
         )
     }
-}
-
-fn interpolate(p1: Vec3, p2: Vec3, valp1: f32, valp2: f32, iso: f32) -> Vec3 {
-    if (iso - valp1).abs() < 1e-6 {
-        return p1;
-    }
-    if (iso - valp2).abs() < 1e-6 {
-        return p2;
-    }
-    let mu = (iso - valp1) / (valp2 - valp1);
-    p1 + (p2 - p1) * mu
 }
 
 fn compute_cube_index(cube: &[f32; 8], iso: f32) -> usize {
