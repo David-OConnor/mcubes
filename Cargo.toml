@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2024"
 authors = ["David O'Connor <the_alchemist@fastmail.com>"]
 description = "The Marching Cubes algorithm for creating isosurfaces"
-keywords = []
+keywords = ["marching-cubes", "isosurface", "mesh", "electron-map"]
 categories = [
-    "science"
+    "science", "algorithms", "mathematics", "graphics",
 ]
 repository = "https://github.com/David-OConnor/mcubes"
 documentation = "https://docs.rs/mcubes"
