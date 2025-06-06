@@ -4,7 +4,7 @@
 //!
 //! Example use:
 //! ```rust
-//! use mcubes::{GridPoint, MarchingCubes};
+//! use mcubes::{GridPoint, MarchingCubes, MeshSide};
 //!
 //! pub struct ElectronDensity {
 //!     pub coords: Vec3,
@@ -28,7 +28,7 @@
 //!         iso_level,
 //!     );
 //!
-//!     let mesh = mc.generate();
+//!     let mesh = mc.generate(MeshSide::Both);
 //! }
 //! ```
 //!
@@ -37,7 +37,6 @@ mod tables;
 use std::{io, io::ErrorKind};
 
 // use std::time::Instant;
-use graphics::{Mesh, Vertex};
 use lin_alg::f32::Vec3;
 
 use crate::tables::{CUBE_CORNER_OFFSETS, EDGE_TABLE, EDGE_VERTEX_PAIRS, TRI_TABLE};
@@ -46,20 +45,18 @@ pub trait GridPoint {
     fn value(&self) -> f64;
 }
 
-// todo: Use this custom type, and make a custom Vertex type, to make this library more accessible, i.e.
-// todo: to not depend on `graphics`.
-
+/// Represents a Vertex output by the algorithm.
 #[derive(Debug)]
-pub struct Vertex_ {
+pub struct Vertex {
     pub posit: Vec3,
     pub normal: Vec3,
 }
 
-/// Represents a mesh output by the algorithm.
+/// Represents a mesh output by the algorithm. Convert this to your downstream application's Mesh.
 #[derive(Debug)]
-pub struct Mesh_ {
-    pub vertices: Vec<Vertex_>,
-    /// Grouped into triangles.
+pub struct Mesh {
+    pub vertices: Vec<Vertex>,
+    /// Grouped into triangles, each 3 indices.
     pub indices: Vec<usize>,
 }
 
@@ -69,6 +66,13 @@ pub struct MarchingCubes {
     pub values: Vec<f32>,
     pub iso_level: f32,
     scale: [f32; 3],
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum MeshSide {
+    Both,
+    OutsideOnly,
+    InsideOnly,
 }
 
 impl MarchingCubes {
@@ -152,7 +156,7 @@ impl MarchingCubes {
     }
 
     /// Run this to generate the mesh; this function contains the primary algorithm.
-    pub fn generate(&self) -> Mesh {
+    pub fn generate(&self, mesh_side: MeshSide) -> Mesh {
         // Note: We observed slowdowns vice speedups with Rayon, for electron density.
         let mut vertices = Vec::new();
         let mut indices = Vec::new();
@@ -216,23 +220,41 @@ impl MarchingCubes {
                         norm_list[i] = (-g).to_normalized();
                     }
 
-                    for mut tri in TRI_TABLE[cube_index].chunks(3) {
-                        if tri[0] == -1 {
+                    for tri_inside in TRI_TABLE[cube_index].chunks(3) {
+                        if tri_inside[0] == -1 {
                             break;
                         }
 
+                        let tri_inside = tri_inside.to_vec();
+
                         // Flip the index order from the table, to get correct-oriented faces.
-                        let mut tri = tri.to_vec();
-                        let orig_0 = tri[0];
-                        tri[0] = tri[1];
-                        tri[1] = orig_0;
+                        let tri_outside = if mesh_side == MeshSide::InsideOnly {
+                            Vec::new()
+                        } else {
+                            let mut t = tri_inside.clone();
+                            let orig_0 = tri_inside[0];
+                            t[0] = tri_inside[1];
+                            t[1] = orig_0;
+                            t
+                        };
 
-                        for &edge_id in &tri {
-                            let p = pos_list[edge_id as usize];
-                            let n = norm_list[edge_id as usize];
+                        let tri_sets = match mesh_side {
+                            MeshSide::Both => vec![&tri_outside, &tri_inside],
+                            MeshSide::InsideOnly => vec![&tri_inside],
+                            MeshSide::OutsideOnly => vec![&tri_outside],
+                        };
 
-                            vertices.push(Vertex::new([p.x, p.y, p.z], n));
-                            indices.push(vertices.len() - 1);
+                        for set in tri_sets {
+                            for &edge_id in set {
+                                let p = pos_list[edge_id as usize];
+                                let normal = norm_list[edge_id as usize];
+
+                                vertices.push(Vertex {
+                                    posit: Vec3::new(p.x, p.y, p.z),
+                                    normal
+                                });
+                                indices.push(vertices.len() - 1);
+                            }
                         }
                     }
                 }
@@ -245,7 +267,6 @@ impl MarchingCubes {
         Mesh {
             vertices,
             indices,
-            material: 0,
         }
     }
 

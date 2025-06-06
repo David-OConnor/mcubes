@@ -8,10 +8,10 @@ Uses the Marching Cubes algorithm to create isosurfaces in Rust, from volume dat
 
 Based loosely on [PyMarchingCubes](https://github.com/JustusThies/PyMarchingCubes).
 
-For now, depends on the `graphics` library for `Mesh` and `Vertex`. We will remove this requirement later, for a
-lighter dependency tree.
+Outputs a native `Mesh`, which contains native `Vertex`s. In practice, you will convert these to whatever
+mesh struct your application uses. For example, [graphics::Mesh](https://docs.rs/graphics/latest/graphics/struct.Mesh.html).
 
-Uses [lin-alg](https://github.com/david-oconnor/lin-alg) for its `Vec3` type.
+Uses [lin-alg](https://github.com/david-oconnor/lin-alg) for its `Vec3` type; this is the library's only dependency.
 
 Used by the [Daedalus molecule viewer](https://github.com/David-OConnor/daedalus) to view experimentally-derived
 electron density from protein crystals.
@@ -21,7 +21,7 @@ The grid must be  regularly spaced, along 3 orthogonal axes. Values are either a
 
 Example use:
 ```rust
-use mcubes::{GridPoint, MarchingCubes};
+use mcubes::{GridPoint, MarchingCubes, MeshSide};
 
 /// An example data struct from your application. If you use something like this 
 /// to represent a point, you may with to use the `from_gridpoints` constructor.
@@ -47,7 +47,7 @@ fn create_mesh(hdr: &MapHeader, density: &[ElectronDensity], iso_level: f32) {
         iso_level,
     );
     
-    // If you are using a `Vec<f32` for data instead, use this constructor:
+    // If you are using a `Vec<f32` for data instead if `GridPoint`, use this constructor:
     let mc = MarchingCubes::from_gridpoints(
         (hdr.nx as usize, hdr.ny as usize, hdr.nz as usize),
         (hdr.cell[0], hdr.cell[1], hdr.cell[2]),
@@ -57,7 +57,22 @@ fn create_mesh(hdr: &MapHeader, density: &[ElectronDensity], iso_level: f32) {
     );
 
 
-    let mesh = mc.generate();
+    // Use MeshSide::Inside or MeshSide::Outside as required.
+    let mesh = mc.generate(MeshSide::Both);
+    
+    // Example of changing the output mesh to a graphic engine's:
+
+    let vertices = mesh
+        .vertices
+        .iter()
+        .map(|v| graphics::Vertex::new(v.posit.to_arr(), v.normal))
+        .collect();
+
+    scene.meshes[MESH_DENSITY_SURFACE] = graphics::Mesh {
+        vertices,
+        indices: mesh.indices,
+        material: 0,
+    };
 }
 ```
 
