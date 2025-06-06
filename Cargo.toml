@@ -17,4 +17,4 @@ exclude = [".gitignore"]
 
 [dependencies]
 lin_alg = "1.1.10"
-graphics = "0.3.13"
+graphics = "0.4.0"

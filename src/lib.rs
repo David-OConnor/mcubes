@@ -216,12 +216,18 @@ impl MarchingCubes {
                         norm_list[i] = (-g).to_normalized();
                     }
 
-                    for tri in TRI_TABLE[cube_index].chunks(3) {
+                    for mut tri in TRI_TABLE[cube_index].chunks(3) {
                         if tri[0] == -1 {
                             break;
                         }
 
-                        for &edge_id in tri {
+                        // Flip the index order from the table, to get correct-oriented faces.
+                        let mut tri = tri.to_vec();
+                        let orig_0 = tri[0];
+                        tri[0] = tri[1];
+                        tri[1] = orig_0;
+
+                        for &edge_id in &tri {
                             let p = pos_list[edge_id as usize];
                             let n = norm_list[edge_id as usize];
 
