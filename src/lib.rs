@@ -65,6 +65,7 @@ pub struct MarchingCubes {
     pub dims: (usize, usize, usize),
     pub values: Vec<f32>,
     pub iso_level: f32,
+    pub offset: Vec3,
     scale: [f32; 3],
 }
 
@@ -85,6 +86,7 @@ impl MarchingCubes {
         dims: (usize, usize, usize),
         size: (f32, f32, f32),
         sampling_interval: (f32, f32, f32),
+        offset: Vec3,
         values: Vec<f32>,
         iso_level: f32,
     ) -> io::Result<Self> {
@@ -110,6 +112,7 @@ impl MarchingCubes {
             dims,
             values,
             iso_level,
+            offset,
             scale,
         })
     }
@@ -120,11 +123,12 @@ impl MarchingCubes {
         dims: (usize, usize, usize),
         size: (f32, f32, f32),
         sampling_interval: (f32, f32, f32),
+        offset: Vec3,
         values: &[T],
         iso_level: f32,
     ) -> io::Result<Self> {
         let values_vec = values.iter().map(|d| d.value() as f32).collect();
-        Self::new(dims, size, sampling_interval, values_vec, iso_level)
+        Self::new(dims, size, sampling_interval, offset, values_vec, iso_level)
     }
 
     /// Central-difference gradient of the scalar field at integer voxel coords.
@@ -250,7 +254,7 @@ impl MarchingCubes {
                                 let normal = norm_list[edge_id as usize];
 
                                 vertices.push(Vertex {
-                                    posit: Vec3::new(p.x, p.y, p.z),
+                                    posit: Vec3::new(p.x, p.y, p.z) + self.offset,
                                     normal
                                 });
                                 indices.push(vertices.len() - 1);

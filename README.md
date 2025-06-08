@@ -6,6 +6,8 @@
 
 Uses the Marching Cubes algorithm to create isosurfaces in Rust, from volume data. Designed to be easy to integrate.
 
+![Electron density demo](screenshots/daedalus_iso_a.png)
+
 Based loosely on [PyMarchingCubes](https://github.com/JustusThies/PyMarchingCubes).
 
 Outputs a native `Mesh`, which contains native `Vertex`s. In practice, you will convert these to whatever
