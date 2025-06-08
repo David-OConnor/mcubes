@@ -50,7 +50,7 @@ fn create_mesh(hdr: &MapHeader, density: &[ElectronDensity], iso_level: f32) {
     );
     
     // If you are using a `Vec<f32` for data instead if `GridPoint`, use this constructor:
-    let mc = MarchingCubes::from_gridpoints(
+    let mc = MarchingCubes::new(
         (hdr.nx as usize, hdr.ny as usize, hdr.nz as usize),
         (hdr.cell[0], hdr.cell[1], hdr.cell[2]),
         (hdr.mx as f32, hdr.my as f32, hdr.mz as f32),

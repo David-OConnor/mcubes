@@ -207,7 +207,7 @@ impl MarchingCubes {
 
                         pos_list[i] = pa + (pb - pa) * mu;
 
-                        // 2.b gradients (central diff) at corners a & b   ↓↓↓
+                        // Gradients (central difference) at corners a & b
                         let (ax, ay, az) = {
                             let (dx, dy, dz) = CUBE_CORNER_OFFSETS[a];
                             (x + dx, y + dy, z + dz)
@@ -219,7 +219,7 @@ impl MarchingCubes {
                         let ga = self.gradient(ax, ay, az);
                         let gb = self.gradient(bx, by, bz);
 
-                        // Interpolate gradient, then normalise & flip (-∇ρ points “out”)
+                        // Interpolate gradient, then normalise & flip (-∇ρ points out)
                         let g = ga + (gb - ga) * mu;
                         norm_list[i] = (-g).to_normalized();
                     }
@@ -255,7 +255,7 @@ impl MarchingCubes {
 
                                 vertices.push(Vertex {
                                     posit: Vec3::new(p.x, p.y, p.z) + self.offset,
-                                    normal
+                                    normal,
                                 });
                                 indices.push(vertices.len() - 1);
                             }
@@ -268,10 +268,7 @@ impl MarchingCubes {
         // let elapsed = start.elapsed();
         // println!("Time taken for cubes: {:?}us", elapsed.as_micros());
 
-        Mesh {
-            vertices,
-            indices,
-        }
+        Mesh { vertices, indices }
     }
 
     fn get_value(&self, x: usize, y: usize, z: usize) -> f32 {
