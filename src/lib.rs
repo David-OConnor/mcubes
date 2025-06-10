@@ -39,6 +39,8 @@ use std::{io, io::ErrorKind};
 // use std::time::Instant;
 use lin_alg::f32::Vec3;
 
+// #[cfg(target_arch = "x86_64")]
+// use lin_alg::f32::{f32x8, Vec3x8};
 use crate::tables::{CUBE_CORNER_OFFSETS, EDGE_TABLE, EDGE_VERTEX_PAIRS, TRI_TABLE};
 
 pub trait GridPoint {
@@ -173,7 +175,11 @@ impl MarchingCubes {
             for y in 0..(ny - 1) {
                 for z in 0..(nz - 1) {
                     // Corner densities
-                    let mut cube = [0f32; 8];
+                    let mut cube = [0.; 8];
+
+                    // #[cfg(target_arch = "x86_64")]
+                    // let mut cube = f32x8::splat(0.);
+
                     for i in 0..8 {
                         let (dx, dy, dz) = CUBE_CORNER_OFFSETS[i];
                         cube[i] = self.get_value(x + dx, y + dy, z + dz);
@@ -250,13 +256,10 @@ impl MarchingCubes {
 
                         for set in tri_sets {
                             for &edge_id in set {
-                                let p = pos_list[edge_id as usize];
+                                let posit = pos_list[edge_id as usize] + self.offset;
                                 let normal = norm_list[edge_id as usize];
 
-                                vertices.push(Vertex {
-                                    posit: Vec3::new(p.x, p.y, p.z) + self.offset,
-                                    normal,
-                                });
+                                vertices.push(Vertex { posit, normal });
                                 indices.push(vertices.len() - 1);
                             }
                         }
@@ -266,7 +269,7 @@ impl MarchingCubes {
         }
 
         // let elapsed = start.elapsed();
-        // println!("Time taken for cubes: {:?}us", elapsed.as_micros());
+        // println!("Time taken for cubes: {:?}μs", elapsed.as_micros());
 
         Mesh { vertices, indices }
     }

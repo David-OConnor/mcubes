@@ -4,7 +4,8 @@
 [![Docs](https://docs.rs/mcubes/badge.svg)](https://docs.rs/mcubes)
 
 
-Uses the Marching Cubes algorithm to create isosurfaces in Rust, from volume data. Designed to be easy to integrate.
+Uses the Marching Cubes algorithm to create isosurfaces in Rust, from volume data. Designed to be easy to integrate
+in applications.
 
 ![Electron density demo](screenshots/daedalus_iso_a.png)
 
@@ -15,11 +16,14 @@ mesh struct your application uses. For example, [graphics::Mesh](https://docs.rs
 
 Uses [lin-alg](https://github.com/david-oconnor/lin-alg) for its `Vec3` type; this is the library's only dependency.
 
-Used by the [Daedalus molecule viewer](https://github.com/David-OConnor/daedalus) to view experimentally-derived
-electron density from protein crystals.
+Used by the [Daedalus molecule viewer](https://github.com/David-OConnor/daedalus) to view experimentally-derived electron density from protein crystals.
 
 The grid must be  regularly spaced, along 3 orthogonal axes. Values are either a `Vec<f32>`, or points which impl
 `mcubes::GridPoint`. This trait contains a single method: To get the value at that point.
+
+Example creating a solvent-accessible-surface mesh by setting the ISO level to 0, and 
+rendering only the vertices. (Could also render an ordinary mesh)
+![Surface mesh](screenshots/surface_a.png)
 
 Example use:
 ```rust
@@ -62,8 +66,7 @@ fn create_mesh(hdr: &MapHeader, density: &[ElectronDensity], iso_level: f32) {
     // Use MeshSide::Inside or MeshSide::Outside as required.
     let mesh = mc.generate(MeshSide::Both);
     
-    // Example of changing the output mesh to a graphic engine's:
-
+    // Example of converting the generic output mesh to a graphic engine's:
     let vertices = mesh
         .vertices
         .iter()
