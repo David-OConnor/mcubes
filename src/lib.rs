@@ -1,37 +1,9 @@
 #![allow(clippy::needless_range_loop)]
 
 //! Implements the Marching Cubes algorithm for generating Isosurfaces from volume data.
-//!
-//! Example use:
-//! ```rust
-//! use mcubes::{GridPoint, MarchingCubes, MeshSide};
-//!
-//! pub struct ElectronDensity {
-//!     pub coords: Vec3,
-//!     pub density: f64,
-//! }
-//!
-//! impl GridPoint for ElectronDensity {
-//!     fn value(&self) -> f64 { self.density }
-//! }
-//!
-//! fn create_mesh(hdr: &MapHeader, mol: &Molecule, iso_level: f32) {
-//!     let mc = MarchingCubes::new(
-//!         //! Number of grid points along each axis
-//!         (hdr.nx as usize, hdr.ny as usize, hdr.nz as usize),
-//!         //! Grid dimensions per unit cell along each axis
-//!         (hdr.cell[0], hdr.cell[1], hdr.cell[2]),
-//!         //! Sampling interval along each axis. (Usually the same as grid point number of grid points.)
-//!         (hdr.mx as f32, hdr.my as f32, hdr.mz as f32),
-//!         mol.elec_density,
-//!         //! The value to draw the isosurface at.
-//!         iso_level,
-//!     );
-//!
-//!     let mesh = mc.generate(MeshSide::Both);
-//! }
-//! ```
-//!
+//! See the readme for example uses.
+
+
 mod tables;
 
 use std::{io, io::ErrorKind};
