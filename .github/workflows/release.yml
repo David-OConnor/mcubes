@@ -12,6 +12,11 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Prepare packaging files
+        shell: bash
+        run: |
+          cp -f README.md python/README.md
+          cp -f LICENSE python/LICENSE || true
       - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:

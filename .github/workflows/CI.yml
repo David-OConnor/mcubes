@@ -37,6 +37,11 @@ jobs:
           - runner: ubuntu-22.04
             target: ppc64le
     steps:
+      - name: Prepare packaging files
+        shell: bash
+        run: |
+          cp -f README.md python/README.md
+          cp -f LICENSE python/LICENSE || true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -69,6 +74,11 @@ jobs:
           - runner: ubuntu-22.04
             target: armv7
     steps:
+      - name: Prepare packaging files
+        shell: bash
+        run: |
+          cp -f README.md python/README.md
+          cp -f LICENSE python/LICENSE || true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -97,6 +107,11 @@ jobs:
           - runner: windows-latest
             target: x86
     steps:
+      - name: Prepare packaging files
+        shell: bash
+        run: |
+          cp -f README.md python/README.md
+          cp -f LICENSE python/LICENSE || true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
@@ -125,6 +140,11 @@ jobs:
           - runner: macos-14
             target: aarch64
     steps:
+      - name: Prepare packaging files
+        shell: bash
+        run: |
+          cp -f README.md python/README.md
+          cp -f LICENSE python/LICENSE || true
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
