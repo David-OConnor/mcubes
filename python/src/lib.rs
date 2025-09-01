@@ -1,16 +1,15 @@
-use pyo3::exceptions::PyValueError;
-use pyo3::prelude::*;
-
+use lin_alg::f32::Vec3;
 use mcubes_rs::{
     MarchingCubes as MarchingCubesRs, Mesh as MeshRs, MeshSide as MeshSideRs, Vertex as VertexRs,
 };
-use lin_alg::f32::Vec3;
+use pyo3::{exceptions::PyValueError, prelude::*};
 
 #[pyclass]
 pub struct MeshSide {
     value: u8,
 }
 
+// todo: Replace this workflow with how you handle it in Na-seq? Or vice-versa.
 #[pymethods]
 impl MeshSide {
     #[classattr]
@@ -21,14 +20,18 @@ impl MeshSide {
     pub const InsideOnly: Self = Self { value: 2 };
 
     fn __repr__(&self) -> String {
-        match self.value {
-            0 => "MeshSide.Both",
-            1 => "MeshSide.OutsideOnly",
-            2 => "MeshSide.InsideOnly",
-            _ => "MeshSide<?>",
-        }
-            .to_string()
+        format!("Mesh Side: {:?}", self.value)
     }
+
+    // fn __repr__(&self) -> String {
+    //     match self.value {
+    //         0 => "MeshSide.Both",
+    //         1 => "MeshSide.OutsideOnly",
+    //         2 => "MeshSide.InsideOnly",
+    //         _ => "MeshSide<?>",
+    //     }
+    //         .to_string()
+    // }
 }
 
 impl MeshSide {
@@ -43,12 +46,19 @@ impl MeshSide {
 }
 
 #[pyclass]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Vertex {
     #[pyo3(get)]
     posit: (f32, f32, f32),
     #[pyo3(get)]
     normal: (f32, f32, f32),
+}
+
+#[pymethods]
+impl Vertex {
+    fn __repr__(&self) -> String {
+        format!("{self:?}")
+    }
 }
 
 impl From<&VertexRs> for Vertex {
@@ -61,6 +71,7 @@ impl From<&VertexRs> for Vertex {
 }
 
 #[pyclass]
+#[derive(Debug)]
 pub struct Mesh {
     vertices: Vec<Vertex>,
     #[pyo3(get)]
@@ -72,6 +83,10 @@ impl Mesh {
     #[getter]
     fn vertices(&self) -> Vec<Vertex> {
         self.vertices.clone()
+    }
+
+    fn __repr__(&self) -> String {
+        format!("{self:?}",)
     }
 }
 
@@ -110,6 +125,10 @@ impl MarchingCubes {
 
     fn generate(&self, side: &MeshSide) -> Mesh {
         self.inner.generate(side.to_rust()).into()
+    }
+
+    fn __repr__(&self) -> String {
+        format!("{:?}", self.inner)
     }
 }
 
