@@ -42,8 +42,8 @@ jobs:
       - name: Stage README/License for packaging
         shell: bash
         run: |
-          cp -f README.md python/README.md
-          cp -f LICENSE python/LICENSE
+          cp -f README.md python/PYPI_README.md
+          cp -f LICENSE python/PYPI_LICENSE
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -77,8 +77,8 @@ jobs:
       - name: Stage README/License for packaging
         shell: bash
         run: |
-          cp -f README.md python/README.md
-          cp -f LICENSE python/LICENSE
+          cp -f README.md python/PYPI_README.md
+          cp -f LICENSE python/PYPI_LICENSE
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -109,8 +109,8 @@ jobs:
       - name: Stage README/License for packaging
         shell: bash
         run: |
-          cp -f README.md python/README.md
-          cp -f LICENSE python/LICENSE
+          cp -f README.md python/PYPI_README.md
+          cp -f LICENSE python/PYPI_LICENSE
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -141,8 +141,8 @@ jobs:
       - name: Stage README/License for packaging
         shell: bash
         run: |
-          cp -f README.md python/README.md
-          cp -f LICENSE python/LICENSE
+          cp -f README.md python/PYPI_README.md
+          cp -f LICENSE python/PYPI_LICENSE
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -163,8 +163,8 @@ jobs:
       - name: Stage README/License for packaging
         shell: bash
         run: |
-          cp -f README.md python/README.md
-          cp -f LICENSE python/LICENSE
+          cp -f README.md python/PYPI_README.md
+          cp -f LICENSE python/PYPI_LICENSE
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
