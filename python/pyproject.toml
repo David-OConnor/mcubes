@@ -4,9 +4,9 @@ build-backend = "maturin"
 
 [project]
 name = "mcubes"
-description = "Python bindings for the mcubes library"
+description = "The Marching Cubes algorithm for creating isosurfaces"
 requires-python = ">=3.10"
-authors = [{ name = "David O'Connor" }]
+authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
 readme = "README.md"
 license = { file = "LICENSE" }
 dynamic = ["version"]
