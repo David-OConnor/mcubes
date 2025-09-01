@@ -8,8 +8,8 @@ crate-type = ["cdylib"]
 
 
 [dependencies]
-mcubes_rs = { package = "mcubes", version = "0.1.4" }
+mcubes_rs = { package = "mcubes", path = ".." }
 pyo3 = { version = "0.26.0", features = ["extension-module", "abi3-py310"] }
 
-#numpy = "0.26.0"
 lin_alg = "1.3.5"
+#numpy = "0.26.0"
