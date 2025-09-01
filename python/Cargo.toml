@@ -12,4 +12,3 @@ mcubes_rs = { package = "mcubes", path = ".." }
 pyo3 = { version = "0.26.0", features = ["extension-module", "abi3-py310"] }
 
 lin_alg = "1.3.5"
-#numpy = "0.26.0"
