@@ -51,7 +51,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-linux-${{ matrix.platform.target }}
-          path: dist
+          # modded
+          #          path: dist
+          path: python/dist/*
 
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
@@ -81,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
-          path: dist
+          path: python/dist/*
 
   windows:
     runs-on: ${{ matrix.platform.runner }}
@@ -107,7 +109,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-windows-${{ matrix.platform.target }}
-          path: dist
+          path: python/dist/*
 
   macos:
     runs-on: ${{ matrix.platform.runner }}
@@ -134,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-macos-${{ matrix.platform.target }}
-          path: dist
+          path: python/dist/*
 
   sdist:
     runs-on: ubuntu-latest
@@ -150,7 +152,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wheels-sdist
-          path: python/dist
+          path: python/dist/*
 
   release:
     name: Release
@@ -174,7 +176,9 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: 'wheels-*/*'
+          # modded
+          #          subject-path: 'wheels-*/*'
+          subject-path: 'dist/*'
       - name: Publish to PyPI
         if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: PyO3/maturin-action@v1
@@ -182,4 +186,6 @@ jobs:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: --non-interactive --skip-existing wheels-*/*
+          # modded
+          #          args: --non-interactive --skip-existing wheels-*/*
+          args: --non-interactive --skip-existing dist/*
