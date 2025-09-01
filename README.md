@@ -2,9 +2,10 @@
 
 [![Crate](https://img.shields.io/crates/v/mcubes.svg)](https://crates.io/crates/mcubes)
 [![Docs](https://docs.rs/mcubes/badge.svg)](https://docs.rs/mcubes)
+[![PyPI](https://img.shields.io/pypi/v/m_cubes.svg)](https://pypi.org/project/m_cubes)
 
 
-Uses the Marching Cubes algorithm to create isosurfaces in Rust, from volume data. Designed to be easy to integrate
+Uses the Marching Cubes algorithm to create isosurfaces in Rust or Python, from volume data. Designed to be easy to integrate
 in applications.
 
 ![Electron density demo](screenshots/daedalus_iso_a.png)

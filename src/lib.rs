@@ -3,10 +3,9 @@
 //! Implements the Marching Cubes algorithm for generating Isosurfaces from volume data.
 //! See the readme for example uses.
 
-
 mod tables;
 
-use std::{io, io::ErrorKind};
+use std::{io, io::ErrorKind, time::Instant};
 
 // use std::time::Instant;
 use lin_alg::f32::Vec3;
@@ -141,7 +140,7 @@ impl MarchingCubes {
 
         let (nx, ny, nz) = self.dims;
 
-        // let start = Instant::now();
+        let start = Instant::now();
 
         for x in 0..(nx - 1) {
             for y in 0..(ny - 1) {

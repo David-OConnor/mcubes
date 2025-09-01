@@ -16,4 +16,4 @@ exclude = [".gitignore"]
 
 
 [dependencies]
-lin_alg = "1.1.10"
+lin_alg = "1.3.5"
