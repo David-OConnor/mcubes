@@ -7,7 +7,7 @@ name = "mcubes"
 description = "The Marching Cubes algorithm for creating isosurfaces"
 requires-python = ">=3.10"
 authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
-readme = ".../README.md"
+readme = "../README.md"
 license = { file = "../LICENSE" }
 dynamic = ["version"]
 
