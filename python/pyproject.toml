@@ -7,8 +7,8 @@ name = "mcubes"
 description = "The Marching Cubes algorithm for creating isosurfaces"
 requires-python = ">=3.10"
 authors = [{ name = "David O'Connor", email = "the_alchemist@fastmail.com" }]
-readme = "README.md"
-license = { file = "LICENSE" }
+readme = ".../README.md"
+license = { file = "../LICENSE" }
 dynamic = ["version"]
 
 classifiers = [
@@ -20,3 +20,4 @@ classifiers = [
 [tool.maturin]
 # Using ABI3 allows for this to work on any Python version > 3.10; not just 3.10.
 features = ["pyo3/extension-module", "pyo3/abi3-py310"]
+include = ["../README.md", "../LICENSE"]
