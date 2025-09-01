@@ -13,6 +13,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Copy README for maturin
+        run: |
+          cp README.md python/README.md
+          cp LICENSE python/LICENSE
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           working-directory: python
